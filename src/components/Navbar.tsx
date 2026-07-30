@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Menu, X, Phone } from 'lucide-react';
+import { Menu, X, Phone, Globe } from 'lucide-react';
 
 const LOGO = 'https://pub-3a823b4a94e74f1c9bf9813f768ca0e7.r2.dev/builder/135/assets/ai-e6e6e53edd.png';
 
@@ -11,9 +11,38 @@ const links = [
   { href: '#faq', label: 'Info' },
 ];
 
+type Lang = 'it' | 'en';
+
+const t: Record<Lang, {
+  osteria: string;
+  tel: string;
+  prenota: string;
+  openMenu: string;
+  closeMenu: string;
+  callPhone: string;
+}> = {
+  it: {
+    osteria: 'Osteria · Roma',
+    tel: '06 3937 2001',
+    prenota: 'Prenota un tavolo',
+    openMenu: 'Apri menu',
+    closeMenu: 'Chiudi menu',
+    callPhone: 'Chiama il ristorante',
+  },
+  en: {
+    osteria: 'Roman Tavern · Rome',
+    tel: '+39 06 3937 2001',
+    prenota: 'Book a table',
+    openMenu: 'Open menu',
+    closeMenu: 'Close menu',
+    callPhone: 'Call the restaurant',
+  },
+};
+
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
+  const [lang, setLang] = useState<Lang>('it');
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24);
@@ -21,6 +50,12 @@ export default function Navbar() {
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
+
+  useEffect(() => {
+    document.documentElement.lang = lang;
+  }, [lang]);
+
+  const txt = t[lang];
 
   return (
     <>
@@ -47,7 +82,7 @@ export default function Navbar() {
                 Cesare
               </div>
               <div className="text-[10px] md:text-xs uppercase tracking-[0.2em] text-[#94A3B8] mt-0.5">
-                Osteria · Roma
+                {txt.osteria}
               </div>
             </div>
           </a>
@@ -67,29 +102,73 @@ export default function Navbar() {
 
           {/* Right CTA */}
           <div className="hidden md:flex items-center gap-3">
+            {/* Language toggle */}
+            <div
+              role="group"
+              aria-label="Language switcher"
+              className="flex items-center bg-[#1A1612] border border-white/10 rounded-sm overflow-hidden"
+            >
+              <button
+                type="button"
+                onClick={() => setLang('it')}
+                aria-pressed={lang === 'it'}
+                className={`px-2.5 py-1.5 text-xs font-semibold tracking-wider transition-colors ${
+                  lang === 'it'
+                    ? 'bg-[#D4654A] text-white'
+                    : 'text-[#94A3B8] hover:text-[#F8FAFC]'
+                }`}
+              >
+                IT
+              </button>
+              <button
+                type="button"
+                onClick={() => setLang('en')}
+                aria-pressed={lang === 'en'}
+                className={`px-2.5 py-1.5 text-xs font-semibold tracking-wider transition-colors ${
+                  lang === 'en'
+                    ? 'bg-[#D4654A] text-white'
+                    : 'text-[#94A3B8] hover:text-[#F8FAFC]'
+                }`}
+              >
+                EN
+              </button>
+            </div>
             <a
               href="tel:+390639372001"
               className="text-sm text-[#94A3B8] hover:text-[#F8FAFC] transition-colors flex items-center gap-2"
             >
               <Phone className="w-4 h-4" />
-              06 3937 2001
+              {txt.tel}
             </a>
             <a
               href="#prenota"
               className="bg-[#D4654A] hover:bg-[#D4654A]/90 text-white text-sm font-semibold px-5 py-2.5 rounded-sm transition-colors shadow-lg shadow-[#D4654A]/20"
             >
-              Prenota un tavolo
+              {txt.prenota}
             </a>
           </div>
 
-          {/* Mobile hamburger */}
-          <button
-            onClick={() => setOpen(true)}
-            className="md:hidden w-11 h-11 flex items-center justify-center bg-[#1A1612] border border-white/10 rounded-sm"
-            aria-label="Apri menu"
-          >
-            <Menu className="w-5 h-5 text-[#F8FAFC]" />
-          </button>
+          {/* Mobile: lang toggle + hamburger */}
+          <div className="md:hidden flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setLang(lang === 'it' ? 'en' : 'it')}
+              aria-label="Cambia lingua / Switch language"
+              className="h-11 px-3 flex items-center gap-1.5 bg-[#1A1612] border border-white/10 rounded-sm text-xs font-semibold text-[#F8FAFC]"
+            >
+              <Globe className="w-4 h-4 text-[#D4654A]" />
+              <span className={lang === 'it' ? 'text-[#F8FAFC]' : 'text-[#94A3B8]'}>IT</span>
+              <span className="text-[#94A3B8]">/</span>
+              <span className={lang === 'en' ? 'text-[#F8FAFC]' : 'text-[#94A3B8]'}>EN</span>
+            </button>
+            <button
+              onClick={() => setOpen(true)}
+              className="w-11 h-11 flex items-center justify-center bg-[#1A1612] border border-white/10 rounded-sm"
+              aria-label={txt.openMenu}
+            >
+              <Menu className="w-5 h-5 text-[#F8FAFC]" />
+            </button>
+          </div>
         </div>
       </header>
 
@@ -114,7 +193,7 @@ export default function Navbar() {
               <button
                 onClick={() => setOpen(false)}
                 className="w-10 h-10 flex items-center justify-center text-[#F8FAFC]"
-                aria-label="Chiudi menu"
+                aria-label={txt.closeMenu}
               >
                 <X className="w-5 h-5" />
               </button>
@@ -132,19 +211,42 @@ export default function Navbar() {
               ))}
             </nav>
             <div className="p-5 border-t border-white/5 flex flex-col gap-3">
+              <div className="flex items-center bg-[#25201A] border border-white/10 rounded-sm overflow-hidden">
+                <button
+                  type="button"
+                  onClick={() => setLang('it')}
+                  aria-pressed={lang === 'it'}
+                  className={`flex-1 py-2.5 text-xs font-semibold tracking-wider transition-colors ${
+                    lang === 'it' ? 'bg-[#D4654A] text-white' : 'text-[#94A3B8]'
+                  }`}
+                >
+                  IT
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setLang('en')}
+                  aria-pressed={lang === 'en'}
+                  className={`flex-1 py-2.5 text-xs font-semibold tracking-wider transition-colors ${
+                    lang === 'en' ? 'bg-[#D4654A] text-white' : 'text-[#94A3B8]'
+                  }`}
+                >
+                  EN
+                </button>
+              </div>
               <a
                 href="tel:+390639372001"
+                aria-label={txt.callPhone}
                 className="flex items-center justify-center gap-2 text-sm text-[#F8FAFC] border border-white/10 py-3 rounded-sm"
               >
                 <Phone className="w-4 h-4" />
-                06 3937 2001
+                {txt.tel}
               </a>
               <a
                 href="#prenota"
                 onClick={() => setOpen(false)}
                 className="bg-[#D4654A] text-white text-center font-semibold py-3 rounded-sm"
               >
-                Prenota un tavolo
+                {txt.prenota}
               </a>
             </div>
           </div>
